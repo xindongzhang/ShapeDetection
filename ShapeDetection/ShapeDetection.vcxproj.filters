@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Config">
+      <UniqueIdentifier>{a6e30952-391e-49dc-937b-884cbb43c8f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ellipse">
+      <UniqueIdentifier>{1d01ce02-1126-4aea-a90d-59025c8fe530}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TEST">
+      <UniqueIdentifier>{7ba03e8b-7648-40e9-bbc8-6f0e9ae92494}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Preproc">
+      <UniqueIdentifier>{965fd99d-93d1-4365-828c-bca5b96571f7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ConfigCV.h">
+      <Filter>Config</Filter>
+    </ClInclude>
+    <ClInclude Include="EllipseDetector.h">
+      <Filter>Ellipse</Filter>
+    </ClInclude>
+    <ClInclude Include="ImagePreproc.h">
+      <Filter>Preproc</Filter>
+    </ClInclude>
+    <ClInclude Include="IShapeDetector.h">
+      <Filter>Ellipse</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>TEST</Filter>
+    </ClCompile>
+    <ClCompile Include="EllipseDetector.cpp">
+      <Filter>Ellipse</Filter>
+    </ClCompile>
+    <ClCompile Include="ImagePreproc.cpp">
+      <Filter>Preproc</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
