@@ -15,6 +15,7 @@ private:
 	/*--------tool method--------*/
 	float diff(float x, float y){ return std::abs(x-y); }
 	std::vector<cv::RotatedRect> sort(std::vector<cv::RotatedRect> src);
+	int findMaxIndex(std::vector<double> src);
 public:
 	EllipseDetector(){}
 	~EllipseDetector(){}

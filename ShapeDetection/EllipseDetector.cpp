@@ -129,7 +129,69 @@ std::vector<cv::RotatedRect> EllipseDetector::getRawEllipses(cv::Mat edge)
 
 std::vector<cv::RotatedRect> EllipseDetector::tuneRawEliipses(std::vector<cv::RotatedRect> raw_ellipses, cv::Mat src)
 {
-	return raw_ellipses;
+	/*-----------------比较重要的参数---------------*/
+	int LENGTH = 1;
+	int WINSIZE = 10;
+	/*-------------------------------------------*/
+	std::vector<cv::RotatedRect> tune_ellipses;
+	int DEGREE = 360;
+	cv::Mat grad_x, grad_y, grad;
+	cv::Sobel(src, grad_x, src.depth(), 1, 0);
+	cv::Sobel(src, grad_y, src.depth(), 0, 1);
+	grad   = cv::abs(grad_x) + cv::abs(grad_y);
+	for (unsigned int i = 0; i < raw_ellipses.size(); ++i)
+	{
+		std::vector<cv::Point> tuneContour;
+		for (int j = 0; j < DEGREE; ++j)
+		{
+			float angle = raw_ellipses[i].angle;
+			double A  = raw_ellipses[i].size.height * 0.5;
+			double B  = raw_ellipses[i].size.width  * 0.5;
+			float x0 = raw_ellipses[i].center.x;
+			float y0 = raw_ellipses[i].center.y;
+			float cosTHETA = std::cos(j - angle);
+			float sinTHETA = std::sin(j - angle);
+			double x = x0 + A * cosTHETA;
+			double y = y0 + B * sinTHETA;
+			unsigned int x_index = (unsigned int) x;
+			unsigned int y_index = (unsigned int) y;
+			// 沿着方向对椭圆进行校正
+			std::vector<double> Variants;
+			cv::Mat mean, var;
+			for (int l = -LENGTH; l <= LENGTH; ++l) 
+			{
+				int x_moved = (int)(x + l * cosTHETA);
+				int y_moved = (int)(y + l * sinTHETA);
+				if ( x_moved - WINSIZE >= 0 &&
+					 y_moved - WINSIZE >= 0 &&
+					 x_moved + WINSIZE < src.size().height &&
+					 y_moved + WINSIZE < src.size().width)
+				{
+					
+					cv::meanStdDev(
+						grad.rowRange(int(x_moved)-WINSIZE, int(x_moved)+WINSIZE).
+						     colRange(int(y_moved)-WINSIZE, int(y_moved)+WINSIZE), 
+						mean, var
+					);
+					Variants.push_back(var.at<double>(0));
+				}
+			}
+			
+			if (Variants.size() != 0) 
+			{
+				int index = this->findMaxIndex(Variants);
+				double tune_x = x + (index - LENGTH) * cosTHETA;
+				double tune_y = y + (index - LENGTH) * sinTHETA;
+				tuneContour.push_back(cv::Point2f((float)tune_x, (float)tune_y));
+			}
+		}
+		/*---------重新拟合椭圆--------*/
+		cv::Mat pointsf;
+		cv::Mat(tuneContour).convertTo(pointsf, CV_32F);
+		cv::RotatedRect box = fitEllipse(pointsf);
+		tune_ellipses.push_back(box);
+	}
+	return tune_ellipses;
 }
 
 
@@ -149,4 +211,18 @@ std::vector<cv::RotatedRect> EllipseDetector::sort(std::vector<cv::RotatedRect> 
 		}
 	}
 	return src;
+}
+
+int EllipseDetector::findMaxIndex(std::vector<double> src)
+{
+	int index = 0;
+	for (unsigned int i = 0; i < src.size() - 1; ++i)
+	{
+		if (src[i] > src[i+1])
+		{
+			index = i;
+			src[i+1] = src[i];
+		}
+	}
+	return index;
 }
